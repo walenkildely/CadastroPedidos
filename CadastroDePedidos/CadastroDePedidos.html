@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão de Pedidos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="CssPedidos.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-clipboard-list"></i> Gestão de Pedidos</h1>
+            <button id="newOrderBtn" class="primary-btn">
+                <i class="fas fa-plus"></i> Novo Pedido
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Buscar por cliente...">
+            <button id="searchBtn" class="primary-btn">
+                <i class="fas fa-search"></i> Buscar
+            </button>
+        </div>
+        
+        <!-- Filtros Avançados -->
+        <div class="filters-container">
+            <div class="filter-group">
+                <label for="statusFilter"><i class="fas fa-filter"></i> Status</label>
+                <select id="statusFilter">
+                    <option value="todos">Todos</option>
+                    <option value="Pendente">Pendente</option>
+                    <option value="Processando">Processando</option>
+                    <option value="Concluído">Concluído</option>
+                    <option value="Cancelado">Cancelado</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="dateStartFilter"><i class="fas fa-calendar"></i> Data Início</label>
+                <input type="date" id="dateStartFilter">
+            </div>
+            
+            <div class="filter-group">
+                <label for="dateEndFilter"><i class="fas fa-calendar"></i> Data Fim</label>
+                <input type="date" id="dateEndFilter">
+            </div>
+            
+            <div class="filter-group">
+                <label for="paymentFilter"><i class="fas fa-money-bill-wave"></i> Pagamento</label>
+                <select id="paymentFilter">
+                    <option value="todos">Todos</option>
+                    <option value="Dinheiro">Dinheiro</option>
+                    <option value="Cartão de Crédito">Cartão de Crédito</option>
+                    <option value="Cartão de Débito">Cartão de Débito</option>
+                    <option value="PIX">PIX</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Estatísticas -->
+        <div class="stats-container">
+            <h2><i class="fas fa-chart-bar"></i> Estatísticas</h2>
+            <div class="stats-grid">
+                <div class="stat-card cancelados">
+                    <div class="stat-label">Cancelados</div>
+                    <div class="stat-value" id="canceladosCount">0</div>
+                    <div class="stat-label">Total: R$ <span id="canceladosTotal">0,00</span></div>
+                </div>
+                
+                <div class="stat-card concluidos">
+                    <div class="stat-label">Concluídos</div>
+                    <div class="stat-value" id="concluidosCount">0</div>
+                    <div class="stat-label">Total: R$ <span id="concluidosTotal">0,00</span></div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Total de Pedidos</div>
+                    <div class="stat-value" id="totalPedidos">0</div>
+                </div>
+                
+                <div class="stat-card total">
+                    <div class="stat-label">Valor Total Geral</div>
+                    <div class="stat-value">R$ <span id="valorTotalGeral">0,00</span></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Botões de Exportação -->
+        <div class="export-container">
+            <button id="exportExcelBtn" class="export-btn">
+                <i class="fas fa-file-excel"></i> Exportar Excel
+            </button>
+            <button id="exportPdfBtn" class="export-btn export-pdf">
+                <i class="fas fa-file-pdf"></i> Exportar PDF
+            </button>
+        </div>
+        
+        <h2><i class="fas fa-list"></i> Listagem de Pedidos</h2>
+        <div class="table-responsive">
+            <table id="ordersTable">
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Data</th>
+                        <th>Status</th>
+                        <th>Total</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dados serão inseridos via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Modal de Cadastro de Pedido -->
+    <div id="orderFormModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2><i class="fas fa-file-alt"></i> Cadastrar Pedido</h2>
+            <form id="newOrderForm">
+                <div class="form-group">
+                    <label for="clientName"><i class="fas fa-user"></i> Nome do Cliente:</label>
+                    <input type="text" id="clientName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="clientPhone"><i class="fas fa-phone"></i> Telefone:</label>
+                    <input type="tel" id="clientPhone" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="clientAddress"><i class="fas fa-map-marker-alt"></i> Endereço:</label>
+                    <input type="text" id="clientAddress" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="paymentMethod"><i class="fas fa-credit-card"></i> Forma de Pagamento:</label>
+                    <select id="paymentMethod" required>
+                        <option value="">Selecione...</option>
+                        <option value="Dinheiro">Dinheiro</option>
+                        <option value="Cartão de Crédito">Cartão de Crédito</option>
+                        <option value="Cartão de Débito">Cartão de Débito</option>
+                        <option value="PIX">PIX</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-utensils"></i> Produtos:</label>
+                    <div class="products-list">
+                        <div class="product-item">
+                            <input type="checkbox" id="prod1" value="10.00" data-name="Hambúrguer Simples">
+                            <label for="prod1">Hambúrguer Simples - R$ 10,00</label>
+                        </div>
+                        <div class="product-item">
+                            <input type="checkbox" id="prod2" value="15.00" data-name="Hambúrguer Duplo">
+                            <label for="prod2">Hambúrguer Duplo - R$ 15,00</label>
+                        </div>
+                        <div class="product-item">
+                            <input type="checkbox" id="prod3" value="8.00" data-name="Batata Frita">
+                            <label for="prod3">Batata Frita - R$ 8,00</label>
+                        </div>
+                        <div class="product-item">
+                            <input type="checkbox" id="prod4" value="6.00" data-name="Refrigerante">
+                            <label for="prod4">Refrigerante - R$ 6,00</label>
+                        </div>
+                        <div class="product-item">
+                            <input type="checkbox" id="prod5" value="7.00" data-name="Suco Natural">
+                            <label for="prod5">Suco Natural - R$ 7,00</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="orderTotal"><i class="fas fa-calculator"></i> Total do Pedido:</label>
+                    <input type="text" id="orderTotal" value="R$ 0,00" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="orderNotes"><i class="fas fa-sticky-note"></i> Observações:</label>
+                    <textarea id="orderNotes" rows="3"></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-save"></i> Registrar Pedido
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal de Detalhes do Pedido -->
+    <div id="orderDetailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2><i class="fas fa-info-circle"></i> Detalhes do Pedido</h2>
+            <div id="modalContent">
+                <div class="detail-row">
+                    <span class="detail-label">Cliente:</span>
+                    <span id="detailClient" class="detail-value"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Telefone:</span>
+                    <span id="detailPhone" class="detail-value"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Endereço:</span>
+                    <span id="detailAddress" class="detail-value"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Data:</span>
+                    <span id="detailDate" class="detail-value"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Pagamento:</span>
+                    <span id="detailPayment" class="detail-value"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Status:</span>
+                    <span id="detailStatus" class="detail-value"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Total:</span>
+                    <span id="detailTotal" class="detail-value"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Produtos:</span>
+                    <ul id="detailProducts" class="detail-value"></ul>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Observações:</span>
+                    <span id="detailNotes" class="detail-value"></span>
+                </div>
+            </div>
+            <button id="editOrderBtn" class="edit-btn">
+                <i class="fas fa-edit"></i> Editar Pedido
+            </button>
+            <button id="printOrderBtn" class="edit-btn" style="background-color: #4a5568; margin-top: 10px;">
+                <i class="fas fa-print"></i> Imprimir Pedido
+            </button>
+        </div>
+    </div>
+    
+    <!-- Área para impressão (oculta) -->
+    <div id="printable-order" style="display: none;"></div>
+    
+    <script src="ScriptPedidos.js"></script>
+</body>
+</html>
